@@ -1,0 +1,137 @@
+{% extends 'album/base.html' %}
+
+{% block content %}
+<div class="upload-container">
+    <div class="upload-card">
+        <header class="upload-header">
+            <div class="icon-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+            </div>
+            <h1>Új kép hozzáadása</h1>
+            <p>Oszd meg a legújabb pillanataidat!</p>
+        </header>
+
+        <form method="post" enctype="multipart/form-data" id="upload-form">
+            {% csrf_token %}
+
+            <div class="file-drop-area" id="drop-zone">
+                <label for="{{ form.image.id_for_label }}" class="file-label">
+                    <div class="upload-icon-anim">
+                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                    </div>
+                    <span class="file-btn">Kép kiválasztása</span>
+                    <span class="file-info" id="file-name-display">vagy húzd ide a fájlt</span>
+                    {{ form.image }}
+                </label>
+                {% if form.image.errors %}
+                    <p class="error-text">{{ form.image.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="input-group">
+                <label for="{{ form.name.id_for_label }}">Kép címe</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <p class="error-text">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="upload-actions">
+                <button type="submit" class="btn btn-primary btn-block">Feltöltés indítása</button>
+                <a href="{% url 'home' %}" class="btn-cancel">Mégsem</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .upload-container { display: flex; justify-content: center; padding: 2rem 0; }
+    .upload-card { background: white; width: 100%; max-width: 500px; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; }
+    .upload-header { text-align: center; margin-bottom: 2rem; }
+    .icon-circle { width: 56px; height: 56px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+    
+    .file-drop-area {
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .file-drop-area.drag-over {
+        border-color: #2563eb;
+        background: #eff6ff;
+        transform: scale(1.02);
+    }
+
+    .upload-icon-anim { margin-bottom: 1rem; transition: transform 0.3s ease; }
+    .drag-over .upload-icon-anim { transform: translateY(-5px); }
+
+    .file-label { display: flex; flex-direction: column; cursor: pointer; }
+    .file-btn { background: white; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; align-self: center; }
+    .file-info { color: #94a3b8; font-size: 0.9rem; }
+    
+    input[type="file"] { display: none; }
+    
+    .input-group { margin-bottom: 2rem; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
+    
+    .btn-block { width: 100%; padding: 14px; border-radius: 8px; cursor: pointer; border: none; background: #2563eb; color: white; font-weight: 600; }
+    .btn-cancel { display: block; margin-top: 1rem; text-align: center; color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
+    .error-text { color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem; }
+</style>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.querySelector('input[type="file"]');
+    const fileNameDisplay = document.getElementById('file-name-display');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files;
+        updateFileName(files);
+    });
+
+    fileInput.onchange = function() {
+        updateFileName(this.files);
+    };
+
+    function updateFileName(files) {
+        if (files && files[0]) {
+            fileNameDisplay.textContent = "Kiválasztva: " + files[0].name;
+            fileNameDisplay.style.color = "#2563eb";
+            fileNameDisplay.style.fontWeight = "600";
+        }
+    }
+</script>
+{% endblock %}

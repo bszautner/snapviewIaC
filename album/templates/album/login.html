@@ -1,0 +1,170 @@
+{% extends 'album/base.html' %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <header class="auth-header">
+            <div class="login-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+            </div>
+            <h1>Üdvözlünk újra!</h1>
+            <p class="subtitle">Kérjük, jelentkezz be a folytatáshoz.</p>
+        </header>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="error-banner">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Felhasználónév</label>
+                <div class="input-wrapper">
+                    {{ form.username }}
+                </div>
+                {% if form.username.errors %}
+                    <span class="field-error">{{ form.username.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Jelszó</label>
+                <div class="input-wrapper">
+                    {{ form.password }}
+                </div>
+                {% if form.password.errors %}
+                    <span class="field-error">{{ form.password.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-primary btn-login">
+                Bejelentkezés
+            </button>
+        </form>
+
+        <footer class="auth-footer">
+            <p>Még nincs fiókod? <a href="{% url 'register' %}">Hozz létre egyet</a></p>
+        </footer>
+    </div>
+</div>
+
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 4rem 1rem;
+    }
+
+    .auth-card {
+        background: white;
+        padding: 3rem 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+        width: 100%;
+        max-width: 420px;
+        border: 1px solid #f1f5f9;
+    }
+
+    .login-icon {
+        width: 64px;
+        height: 64px;
+        background: #eff6ff;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    .auth-header { text-align: center; margin-bottom: 2.5rem; }
+    .auth-header h1 { font-size: 1.75rem; color: #0f172a; margin: 0; font-weight: 600; }
+    .subtitle { color: #64748b; margin-top: 0.5rem; font-size: 0.95rem; }
+
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label { 
+        display: block; 
+        font-weight: 600; 
+        margin-bottom: 0.5rem; 
+        font-size: 0.85rem;
+        color: #475569;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        box-sizing: border-box;
+        font-size: 1rem;
+        transition: all 0.2s;
+        background: #f8fafc;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #2563eb;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .field-error {
+        color: #ef4444;
+        font-size: 0.8rem;
+        margin-top: 0.4rem;
+        display: block;
+    }
+
+    .btn-login { 
+        width: 100%; 
+        padding: 14px; 
+        margin-top: 1rem; 
+        font-size: 1rem;
+        font-weight: 600;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.1s, background 0.2s;
+    }
+
+    .btn-login:hover { background: #1d4ed8; }
+    .btn-login:active { transform: scale(0.98); }
+
+    .error-banner {
+        background: #fef2f2;
+        color: #991b1b;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        border-left: 4px solid #ef4444;
+    }
+
+    .auth-footer {
+        margin-top: 2.5rem;
+        text-align: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+
+    .auth-footer a { 
+        color: #2563eb; 
+        font-weight: 600; 
+        text-decoration: none; 
+        margin-left: 4px;
+    }
+    
+    .auth-footer a:hover { text-decoration: underline; }
+</style>
+{% endblock %}

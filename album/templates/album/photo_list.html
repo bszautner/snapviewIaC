@@ -1,0 +1,146 @@
+{% extends 'album/base.html' %}
+
+{% block content %}
+<header class="page-header">
+    <div class="header-content">
+        <h1>Fényképalbum</h1>
+        <p class="text-muted">{{ photos|length }} feltöltött pillanat</p>
+    </div>
+
+    <div class="filter-bar">
+        <span class="filter-label">Rendezés:</span>
+        <div class="filter-buttons">
+            <a href="?sort=name" class="filter-link {% if request.GET.sort == 'name' %}active{% endif %}">Név szerint</a>
+            <a href="?sort=date" class="filter-link {% if request.GET.sort == 'date' or not request.GET.sort %}active{% endif %}">Dátum szerint</a>
+        </div>
+    </div>
+</header>
+
+{% if photos %}
+    <div class="photo-grid">
+        {% for photo in photos %}
+            <article class="photo-card">
+                <a href="{% url 'photo_detail' photo.pk %}" class="card-image-link">
+                    <div class="card-image-wrapper">
+                        <img src="{{ photo.image.url }}" alt="{{ photo.name }}" loading="lazy">
+                    </div>
+                </a>
+                
+                <div class="card-body">
+                    <div class="card-info">
+                        <h3><a href="{% url 'photo_detail' photo.pk %}">{{ photo.name }}</a></h3>
+                        <p class="card-meta">
+                            <span>{{ photo.uploaded_by.username }}</span>
+                            <span class="dot">•</span>
+                            <span>{{ photo.uploaded_at|date:"M d." }}</span>
+                        </p>
+                    </div>
+
+                    {% if user.is_authenticated and user == photo.uploaded_by %}
+                        <div class="card-actions">
+                            <form method="post" action="{% url 'photo_delete' photo.pk %}" onsubmit="return confirm('Biztosan törlöd?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-icon-delete" title="Törlés">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📷</div>
+        <p>Még nincs feltöltött kép a galériában.</p>
+        <a href="{% url 'upload' %}" class="btn">Töltsd fel az elsőt!</a>
+    </div>
+{% endif %}
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 2.5rem;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .header-content h1 { margin: 0; font-size: 2rem; color: #0f172a; }
+    .text-muted { color: #64748b; margin: 0.25rem 0 0 0; }
+
+    .filter-bar { display: flex; align-items: center; gap: 1rem; background: #fff; padding: 0.5rem 1rem; border-radius: 50px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .filter-label { font-size: 0.85rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+    .filter-buttons { display: flex; gap: 0.5rem; }
+    .filter-link { text-decoration: none; color: #475569; font-size: 0.9rem; padding: 4px 12px; border-radius: 20px; transition: all 0.2s; }
+    .filter-link.active { background: #2563eb; color: white; }
+
+    .photo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    .photo-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid #f1f5f9;
+    }
+
+    .photo-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 20px rgba(0,0,0,0.08);
+    }
+
+    .card-image-wrapper {
+        aspect-ratio: 4 / 3;
+        overflow: hidden;
+        background: #f8fafc;
+    }
+
+    .card-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+
+    .photo-card:hover .card-image-wrapper img { transform: scale(1.05); }
+
+    .card-body {
+        padding: 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-info h3 { margin: 0; font-size: 1.1rem; }
+    .card-info h3 a { color: #1e293b; text-decoration: none; }
+    
+    .card-meta { margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #64748b; display: flex; gap: 0.5rem; }
+    .dot { color: #cbd5e1; }
+
+    .btn-icon-delete {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+
+    .btn-icon-delete:hover { background: #fee2e2; color: #ef4444; }
+
+    .empty-state { text-align: center; padding: 5rem 0; color: #64748b; }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    @media (max-width: 640px) {
+        .page-header { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+{% endblock %}

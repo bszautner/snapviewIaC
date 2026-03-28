@@ -1,0 +1,132 @@
+{% extends 'album/base.html' %}
+
+{% block content %}
+<div class="photo-detail-container">
+    <div class="photo-viewer">
+        <div class="photo-frame">
+            <img src="{{ photo.image.url }}" alt="{{ photo.name }}" class="main-image">
+        </div>
+        
+        <div class="photo-info-bar">
+            <div class="info-main">
+                <h1>{{ photo.name }}</h1>
+                <div class="meta-tags">
+                    <span class="meta-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        {{ photo.uploaded_by.username }}
+                    </span>
+                    <span class="meta-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        {{ photo.uploaded_at|date:"Y. F j." }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="photo-actions">
+                <a href="/" class="btn-outline">
+                    Vissza a galériához
+                </a>
+                
+                {% if user.is_authenticated and user == photo.uploaded_by %}
+                    <a href="{% url 'photo_delete' photo.pk %}" class="btn-danger-small">Törlés</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .photo-detail-container {
+        display: flex;
+        justify-content: center;
+        padding: 1rem 0;
+    }
+
+    .photo-viewer {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        max-width: 100%;
+        width: 1000px;
+    }
+
+    .photo-frame {
+        background: #f1f5f9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 300px;
+    }
+
+    .main-image {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        max-height: 80vh;
+        object-fit: contain;
+    }
+
+    .photo-info-bar {
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .info-main h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.75rem;
+        color: #0f172a;
+    }
+
+    .meta-tags {
+        display: flex;
+        gap: 1rem;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .photo-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .btn-outline {
+        border: 1px solid #e2e8f0;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #475569;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-outline:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+
+    .btn-danger-small {
+        color: #ef4444;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 640px) {
+        .photo-info-bar {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
