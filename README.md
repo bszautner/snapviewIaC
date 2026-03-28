@@ -7,7 +7,7 @@
 
 A projekt során egy olyan skálázható webes alkalmazást hoztam létre, amely képes nagy mennyiségű vizuális adat (fénykép) tárolására és rendszerezésére. A fejlesztés során a modern felhasználói élményt (UX) ötvöztem a felhőalapú infrastruktúra (PaaS) biztonságával.  
 
-**GitHub Repository:** [bszautner/snapview](https://github.com/bszautner/snapview)
+**GitHub Repository:** [bszautner/snapviewIaC](https://github.com/bszautner/snapviewIaC)
 
 ### Főbb funkcionális követelmények:
 
@@ -22,9 +22,9 @@ A projekt során egy olyan skálázható webes alkalmazást hoztam létre, amely
 |-------------|-------------------------------|--------------------------------------------------------------------------|
 | Backend     | Python / Django               | A gyors prototípus-készítés és a beépített biztonsági funkciók miatt választottam. |
 | Frontend    | HTML5, CSS3, JS               | A modern megjelenést (Inter font) és az interaktív Drag & Drop funkciót ezzel valósítottam meg. |
-| Adatbázis   | Azure Database for PostgreSQL | A relációs adatok (felhasználók, metaadatok) stabil, felhőalapú tárolására ezt alkalmaztam. |
-| Fájltárolás | Azure Blob Storage            | Költséghatékony és végtelenül skálázható megoldásként integráltam.      |
-| Deployment  | GitHub Actions                | Teljesen automatizált CI/CD folyamatot alakítottam ki az Azure App Service-re. |
+| Adatbázis   | Render Database for PostgreSQL | A relációs adatok (felhasználók, metaadatok) stabil, felhőalapú tárolására ezt alkalmaztam. |
+| Fájltárolás | Cloudinary           | Költséghatékony és végtelenül skálázható megoldásként integráltam.      |
+| Deployment  | GitHub Actions                | Teljesen automatizált CI/CD folyamatot alakítottam ki az Render. |
 
 ---
 
@@ -50,19 +50,19 @@ A képre kattintva a `photo_detail.html` oldal töltődik be, ahol a kép közve
 
 ---
 
-## 3. Felhő-architektúra részletezése (Azure)
+## 3. Felhő-architektúra részletezése 
 
-A teljes alkalmazást az Azure felhőben, egy dedikált erőforráscsoportba (Resource Group) szervezve üzemeltetem.
+A teljes alkalmazást az Render felhőben üzemeltetem.
 
-### 3.1 Azure App Service (PaaS)
+### 3.1 Render Service (PaaS)
 
-A Python-kódom egy App Service-en fut, amely a HTTP-kérések kiszolgálásáért felel. A `settings.py`-ban használt érzékeny adatokat (adatbázis URL, kulcsok) az Azure környezeti változóiként (Configuration) tárolom.
+A Python-kódom a Render PaaS környezeten fut, amely a HTTP-kérések kiszolgálásáért felel. A `settings.py`-ban használt érzékeny adatokat (adatbázis URL, kulcsok) tárolom.
 
-### 3.2 Azure Storage Account (Blob)
+### 3.2 Cloudinary (Storage)
 
-A médiafájlok kezeléséhez az Azure Blob Storage-ot használtam. A `django-storages` könyvtár segítségével úgy konfiguráltam a rendszert, hogy a feltöltött fájlok automatikusan az objektumtárolóba kerüljenek.
+A médiafájlok kezeléséhez az Cloudinary Storage-ot használtam. A `django-storages` könyvtár segítségével úgy konfiguráltam a rendszert, hogy a feltöltött fájlok automatikusan az Cloudinary tárolóba kerüljenek.
 
-### 3.3 Azure Database for PostgreSQL
+### 3.3 Render database for PostgreSQL
 
 Az első fázisban még SQLite-ot használtam, de a végleges verzióban már (jelenleg is ez van már üzembe helyezve) egy dedikált PostgreSQL szervert állítottam be. Ez biztosítja az adatok perzisztenciáját és a többfelhasználós környezet stabilitását.
 
@@ -75,18 +75,6 @@ Az első fázisban még SQLite-ot használtam, de a végleges verzióban már (j
 Létrehoztam egy `.github/workflows/main.yml` fájlt, amely minden `develop` branch-re történő push esetén automatikusan elindítja a folyamatot:
 
 1. **Build:** Ellenőrzöm a Python függőségeket.
-2. **Deploy:** Sikeres build után a kódom automatikusan frissül az Azure App Service-en.
+2. **Deploy:** Sikeres build után a kódom automatikusan frissül az Render-en.
 3. **Post-deploy:** Automatikusan lefuttatom az adatbázis-migrációkat, így a séma mindig naprakész marad.
 
----
-
-## 5. Kihívások és megoldások
-
-Az alábbi táblázatban foglaltam össze a fejlesztés során megoldott technikai kihívásokat:
-
-| Kihívás                          | Az általam alkalmazott megoldás                                                                                              |
-|----------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
-| Fájlfeltöltés és Blob Storage    | Egyedi tároló osztályt implementáltam a `django-storages` segítségével, így a fájlokat közvetlenül a felhőbe tölti fel az alkalmazás.   |
-| Biztonsági hitelesítés           | A nézeteknél a `UserPassesTestMixin`-t használtam, a sablonokban pedig feltételes logikával korlátoztam a funkciókat. |
-| Drag & Drop szinkronizáció       | JavaScript eseménykezelőkkel oldottam meg, hogy a "drop" eseménykor a fájl manuálisan hozzárendelődjön a rejtett Django input mezőhöz. |
-| Adatbázis migráció               | Az Azure PostgreSQL tűzfal szabályait úgy konfiguráltam, hogy biztonságos kapcsolatot engedjen az App Service és a saját gépem felől is. |
